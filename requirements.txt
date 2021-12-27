@@ -1,0 +1,8 @@
+uvicorn
+pydantic
+fastapi==0.60.1
+starlette==0.13.6
+jupyter
+jupyterlab
+bigquery==0.0.12
+togglCli==2.4.2

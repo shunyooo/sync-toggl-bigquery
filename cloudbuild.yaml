@@ -1,0 +1,29 @@
+steps:
+  - id: pull image
+    name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+     - '-c'
+     - |
+       docker pull gcr.io/$_PROJECT/${_IMAGE}:latest || exit 0
+  - id: build image
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/${_PROJECT}/${_IMAGE}:latest', '-f', './Dockerfile', 
+           '--cache-from', 'gcr.io/${_PROJECT}/${_IMAGE}:latest', '.']
+  - id: push image
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/${_PROJECT}/${_IMAGE}:latest']
+  - id: allocate tag
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['tag',
+           'gcr.io/${_PROJECT}/${_IMAGE}:latest',
+           'gcr.io/${_PROJECT}/${_IMAGE}:${_VERSION}']
+  - id: run deploy
+    name: 'gcr.io/cloud-builders/gcloud'
+    args: ['beta', 'run', 'deploy', '${_SERVICE}', '--image', 'gcr.io/${_PROJECT}/${_IMAGE}', 
+           '--region', '${_REGION}', '--platform', 'managed', '--memory', '1Gi',
+           '--allow-unauthenticated', '--concurrency', '5', '--timeout', '50m',
+           '--update-env-vars', '${_API_ENV}', '--service-account', '${_SERVICE_ACCOUNT}']
+timeout: 1800s
+options:
+  substitution_option: "MUST_MATCH"

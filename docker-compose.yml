@@ -1,0 +1,23 @@
+version: '3.7'
+services:
+  api:
+    build:
+        context: ./
+        dockerfile: ./Dockerfile
+    ports:
+      - 5010:5010 # jupyter
+      - 5000:5000 # fastapi
+    volumes:
+      - ./:/work
+    command: bash -c "jupyter lab --allow-root --ip 0.0.0.0 --port 5010 --no-browser & exec uvicorn --port 5000 --host 0.0.0.0 app.main:app --reload"
+    environment:
+      - PORT=5000
+      - GCP_PROJECT_ID=*****
+      - GCP_LOCATION=asia-northeast1
+      - API_PROJECT_NAME=ToggleBigQuery
+      - API_VERSION=1.0.0
+      - SERVICE_ACCOUNT=****@****.iam.gserviceaccount.com
+      - TOGGL_API_TOKEN=****
+      - TOGGL_TIMEZONE=jst
+      - GCP_BQ_DATASET_ID=toggle
+      - GOOGLE_APPLICATION_CREDENTIALS=/work/credentials/****.json
